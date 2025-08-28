@@ -2,16 +2,34 @@ package com.matheusmarqs1.customer_api.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "tb_customer")
 public class Customer implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@Column(nullable = false)
 	private String name;
+	@Column(nullable = false, unique = true)
 	private String cpf;
+	@Column(nullable = false, unique = true)
 	private String email;
+	@Column(nullable = false)
 	private LocalDate birthDate;
+	@Column(nullable = false)
 	private String phone;
 	
 	public Customer() {
@@ -73,6 +91,12 @@ public class Customer implements Serializable {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	
+	public int getAge() {
+		LocalDate currentDate = LocalDate.now();
+		int age = Period.between(birthDate, currentDate).getYears();
+		return age;
 	}
 
 	@Override
