@@ -8,9 +8,9 @@ import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerResponse;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
 import com.matheusmarqs1.customer_api.entities.Customer;
+import com.matheusmarqs1.customer_api.exceptions.BusinessException;
+import com.matheusmarqs1.customer_api.exceptions.ResourceNotFoundException;
 import com.matheusmarqs1.customer_api.repositories.CustomerRepository;
-import com.matheusmarqs1.customer_api.services.exceptions.BusinessException;
-import com.matheusmarqs1.customer_api.services.exceptions.ResourceNotFoundException;
 
 @Service
 public class CustomerService {
@@ -21,13 +21,13 @@ public class CustomerService {
 		this.customerRepository = customerRepository;
 	}
 	
-	public List<CustomerResponse> getAllCustomers(){
+	public List<CustomerResponse> findAllCustomers(){
 		return customerRepository.findAll().stream()
 				.map(CustomerResponse::fromEntity)
 				.toList();
 	}
 	
-	public CustomerResponse getCustomerById(Long id) {
+	public CustomerResponse findCustomerById(Long id) {
 		Customer customer = customerRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found with ID: " + id));
 		
