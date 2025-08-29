@@ -1,7 +1,8 @@
 package com.matheusmarqs1.customer_api.services;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
@@ -21,10 +22,11 @@ public class CustomerService {
 		this.customerRepository = customerRepository;
 	}
 	
-	public List<CustomerResponse> findAllCustomers(){
-		return customerRepository.findAll().stream()
-				.map(CustomerResponse::fromEntity)
-				.toList();
+	public Page<CustomerResponse> findAllCustomers(int page, int size){
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Customer> customersPage = customerRepository.findAll(pageable);
+		return customersPage.map(CustomerResponse::fromEntity);
+				
 	}
 	
 	public CustomerResponse findCustomerById(Long id) {
