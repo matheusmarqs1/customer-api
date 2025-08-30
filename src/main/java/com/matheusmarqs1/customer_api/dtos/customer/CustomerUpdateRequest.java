@@ -27,8 +27,16 @@ public record CustomerUpdateRequest(
 		LocalDate birthDate,
 		
 		@NotBlank(message = "Phone number is required")
-		@Pattern(regexp = "^\\d{10,11}$", message = "Phone number must contain 10 or 11 digits")
-		String phone
+		@Size(min = 10, max = 11, message = "Phone number must be between 10 and 11 digits")
+		@Pattern(regexp = "^\\d+$", message = "Phone number must contain only digits")
+		String phone,
+		
+		@NotBlank(message = "Password is required")
+		@Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
+		@Pattern(
+				regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", 
+				message = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+		String password
 		) {
 
 }

@@ -31,11 +31,13 @@ public class Customer implements Serializable {
 	private LocalDate birthDate;
 	@Column(nullable = false)
 	private String phone;
+	@Column(nullable=false)
+	private String password;
 	
 	public Customer() {
 	}
 
-	public Customer(Long id, String name, String cpf, String email, LocalDate birthDate, String phone) {
+	public Customer(Long id, String name, String cpf, String email, LocalDate birthDate, String phone, String password) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -43,6 +45,7 @@ public class Customer implements Serializable {
 		this.email = email;
 		this.birthDate = birthDate;
 		this.phone = phone;
+		this.password = password;
 	}
 
 	public Long getId() {
@@ -93,6 +96,14 @@ public class Customer implements Serializable {
 		this.phone = phone;
 	}
 	
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	public int getAge() {
 		LocalDate currentDate = LocalDate.now();
 		int age = Period.between(birthDate, currentDate).getYears();
