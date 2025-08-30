@@ -1,4 +1,4 @@
-package com.matheusmarqs1.customer_api.exceptions.handler;
+package com.matheusmarqs1.customer_api.controllers.exceptions;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -11,9 +11,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.matheusmarqs1.customer_api.exceptions.BusinessException;
-import com.matheusmarqs1.customer_api.exceptions.ResourceNotFoundException;
-import com.matheusmarqs1.customer_api.exceptions.StandardError;
+import com.matheusmarqs1.customer_api.services.exceptions.BusinessException;
+import com.matheusmarqs1.customer_api.services.exceptions.ResourceNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 

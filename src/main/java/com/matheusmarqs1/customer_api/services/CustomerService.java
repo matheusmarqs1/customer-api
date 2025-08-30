@@ -1,17 +1,20 @@
 package com.matheusmarqs1.customer_api.services;
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerResponse;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
 import com.matheusmarqs1.customer_api.entities.Customer;
-import com.matheusmarqs1.customer_api.exceptions.BusinessException;
-import com.matheusmarqs1.customer_api.exceptions.ResourceNotFoundException;
 import com.matheusmarqs1.customer_api.repositories.CustomerRepository;
+import com.matheusmarqs1.customer_api.services.exceptions.BusinessException;
+import com.matheusmarqs1.customer_api.services.exceptions.ResourceNotFoundException;
+import com.matheusmarqs1.customer_api.specifications.CustomerSpecs;
 
 @Service
 public class CustomerService {
@@ -21,12 +24,16 @@ public class CustomerService {
 	public CustomerService(CustomerRepository customerRepository) {
 		this.customerRepository = customerRepository;
 	}
-	
-	public Page<CustomerResponse> findAllCustomers(int page, int size){
-		Pageable pageable = PageRequest.of(page, size);
-		Page<Customer> customersPage = customerRepository.findAll(pageable);
+
+	public Page<CustomerResponse> findCustomers(String name, String cpf, String email, LocalDate birthDate, String phone,  Pageable pageable){
+		Specification<Customer> spec = CustomerSpecs.byName(name)
+				.and(CustomerSpecs.byCpf(cpf))
+				.and(CustomerSpecs.byEmail(email))
+				.and(CustomerSpecs.byBirthDate(birthDate))
+				.and(CustomerSpecs.byPhone(phone));
+		
+		Page<Customer> customersPage =  customerRepository.findAll(spec,pageable);
 		return customersPage.map(CustomerResponse::fromEntity);
-				
 	}
 	
 	public CustomerResponse findCustomerById(Long id) {

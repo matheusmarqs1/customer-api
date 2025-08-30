@@ -1,8 +1,11 @@
 package com.matheusmarqs1.customer_api.controllers;
 
 import java.net.URI;
+import java.time.LocalDate;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,10 +36,16 @@ public class CustomerController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<Page<CustomerResponse>> findAllCustomers(@RequestParam(defaultValue = "0") int page, 
-																   @RequestParam(defaultValue = "10") int size){
-		Page<CustomerResponse> customers = customerService.findAllCustomers(page, size);
-		return ResponseEntity.ok().body(customers);
+	public ResponseEntity<Page<CustomerResponse>> findCustomers(
+			@RequestParam(required = false) String name,
+			@RequestParam(required = false) String cpf,
+			@RequestParam(required = false) String email,
+			@RequestParam(required = false) LocalDate birthDate,
+			@RequestParam(required = false) String phone,
+			@PageableDefault(page = 0, size = 10) Pageable pageable
+			){
+				Page<CustomerResponse> customers = customerService.findCustomers(name, cpf, email, birthDate, phone, pageable);
+				return ResponseEntity.ok().body(customers);
 	}
 	
 	@GetMapping(value = "/{id}")

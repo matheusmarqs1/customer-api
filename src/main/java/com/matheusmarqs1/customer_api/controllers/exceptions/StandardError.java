@@ -1,4 +1,4 @@
-package com.matheusmarqs1.customer_api.exceptions;
+package com.matheusmarqs1.customer_api.controllers.exceptions;
 
 import java.io.Serializable;
 import java.time.Instant;
