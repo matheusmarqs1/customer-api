@@ -34,7 +34,7 @@ public record CustomerUpdateRequest(
 		@NotBlank(message = "Password is required")
 		@Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
 		@Pattern(
-				regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", 
+				regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*\\W)[A-Za-z\\d\\W_]+$", 
 				message = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
 		String password
 		) {

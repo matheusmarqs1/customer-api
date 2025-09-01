@@ -11,28 +11,28 @@ public class CustomerSpecs {
 	
 	public static Specification<Customer> byName(String name){
 		 return (root, query, builder) -> 
-			 (ObjectUtils.isEmpty(name)) ? null : builder.like(builder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+			 (ObjectUtils.isEmpty(name)) ? builder.conjunction() : builder.like(builder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
 		 
 	}
 	
 	public static Specification<Customer> byCpf(String cpf){
 		return (root, query, builder) ->
-			(ObjectUtils.isEmpty(cpf)) ? null : builder.equal(root.get("cpf"), cpf);
+			(ObjectUtils.isEmpty(cpf)) ? builder.conjunction() : builder.equal(root.get("cpf"), cpf);
 	}
 	
 	public static Specification<Customer> byEmail(String email){
 		return (root, query, builder) -> 
-			(ObjectUtils.isEmpty(email)) ? null : builder.equal(root.get("email"), email);
+			(ObjectUtils.isEmpty(email)) ? builder.conjunction() : builder.equal(root.get("email"), email);
 	}
 	
 	public static Specification<Customer> byBirthDate(LocalDate birthDate){
 		return(root, query, builder) -> 
-			(birthDate == null) ? null : builder.equal(root.get("birthDate"), birthDate);
+			(birthDate == null) ? builder.conjunction() : builder.equal(root.get("birthDate"), birthDate);
 	}
 	
 	public static Specification<Customer> byPhone(String phone){
 		return(root, query, builder) ->
-			(ObjectUtils.isEmpty(phone)) ? null : builder.equal(root.get("phone"), phone);
+			(ObjectUtils.isEmpty(phone)) ? builder.conjunction() : builder.equal(root.get("phone"), phone);
 	}
 	
 }

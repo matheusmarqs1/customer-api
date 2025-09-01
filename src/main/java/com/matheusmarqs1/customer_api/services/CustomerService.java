@@ -82,11 +82,13 @@ public class CustomerService {
 			}
 		});
 		
+		String encryptedPassword = passwordEncoder.encode(updateRequest.password());
+		
 		customer.setName(updateRequest.name());
 		customer.setEmail(updateRequest.email());
 		customer.setBirthDate(updateRequest.birthDate());
 		customer.setPhone(updateRequest.phone());
-		customer.setPassword(updateRequest.password());
+		customer.setPassword(encryptedPassword);
 		
 		Customer savedCustomer = customerRepository.save(customer);
 		return CustomerResponse.fromEntity(savedCustomer);
