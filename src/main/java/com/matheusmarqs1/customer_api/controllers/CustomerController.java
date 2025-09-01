@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,6 +52,7 @@ public class CustomerController {
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<CustomerResponse> findCustomerById(@PathVariable Long id){
 		CustomerResponse customer = customerService.findCustomerById(id);
+		System.out.println("Authentication principal: " + SecurityContextHolder.getContext().getAuthentication());
 		return ResponseEntity.ok().body(customer);
 	}
 	

@@ -1,9 +1,10 @@
 package com.matheusmarqs1.customer_api.controllers;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.matheusmarqs1.customer_api.security.AuthRequest;
 import com.matheusmarqs1.customer_api.security.AuthenticationService;
 
 @RestController
@@ -16,8 +17,8 @@ public class AuthenticationController {
 	}
 	
 	@PostMapping("authenticate")
-	public String authenticate(Authentication authentication) {
-		return authenticationService.authenticate(authentication);
+	public String authenticate(@RequestBody AuthRequest request) {
+		return authenticationService.authenticate(request.email(), request.password());
 	}
 
 }
