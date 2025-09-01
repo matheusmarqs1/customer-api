@@ -104,6 +104,7 @@ public class CustomerServiceTest {
 		);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	@DisplayName("Should return all customers when no filters are provided")
 	void shouldReturnAllCustomersInPage() {
@@ -118,13 +119,16 @@ public class CustomerServiceTest {
 		
 		assertNotNull(response);
 		assertEquals(2, response.getTotalElements());
+		assertEquals(existingCustomer.getId(), response.getContent().get(0).id());
 		assertEquals(existingCustomer.getName(), response.getContent().get(0).name());
+		assertEquals(otherExistingCustomer.getId(), response.getContent().get(1).id());
 		assertEquals(otherExistingCustomer.getName(), response.getContent().get(1).name());
 		
 		verify(customerRepository).findAll(any(Specification.class), eq(pageable));
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	@DisplayName("Should return customers when a filter is provided")
 	void shouldReturnCustomersWhenFilteredByCpf() {
@@ -138,8 +142,29 @@ public class CustomerServiceTest {
 		
 		assertNotNull(response);
 		assertEquals(1, response.getTotalElements());
+		assertEquals(existingCustomer.getId(), response.getContent().get(0).id());
 		assertEquals(existingCustomer.getName(), response.getContent().get(0).name());
 		assertEquals(existingCustomer.getCpf(), response.getContent().get(0).cpf());
+		
+		verify(customerRepository).findAll(any(Specification.class), eq(pageable));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	void shouldReturnCustomersWhenMoreFiltersAreApplied() {
+		Pageable pageable = PageRequest.of(DEFAULT_PAGE, DEFAULT_SIZE);
+		
+		Page<Customer> page = new PageImpl<>(List.of(existingCustomer), pageable, 1);
+		
+		when(customerRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
+		
+		Page<CustomerResponse> response = customerService.findCustomers("Ronaldo Rosa",null,"ronaldorosa@example.com", null, null, pageable);
+		
+		assertNotNull(response);
+		assertEquals(1, response.getTotalElements());
+		assertEquals(existingCustomer.getId(), response.getContent().get(0).id());
+		assertEquals(existingCustomer.getName(), response.getContent().get(0).name());
+		assertEquals(existingCustomer.getEmail(), response.getContent().get(0).email());
 		
 		verify(customerRepository).findAll(any(Specification.class), eq(pageable));
 	}

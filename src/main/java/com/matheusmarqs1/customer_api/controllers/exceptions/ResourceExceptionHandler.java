@@ -61,7 +61,7 @@ public class ResourceExceptionHandler {
 	public ResponseEntity<StandardError> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e, HttpServletRequest request){
 		 String error = "Invalid argument type";
 		 HttpStatus status = HttpStatus.BAD_REQUEST;
-		 String message = String.format("ID is invalid. It must be a number", 
+		 String message = String.format("Parameter '%s' with value '%s' is invalid. It must be of type %s", 
                  e.getName(), e.getValue(), e.getRequiredType().getSimpleName());
 		 
 		 StandardError err = new StandardError(Instant.now(), status.value(), error, message, request.getRequestURI());

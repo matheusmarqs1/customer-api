@@ -1,5 +1,6 @@
 package com.matheusmarqs1.customer_api.controllers;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -37,6 +38,8 @@ import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerResponse;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
 import com.matheusmarqs1.customer_api.services.CustomerService;
+import com.matheusmarqs1.customer_api.services.exceptions.BusinessException;
+import com.matheusmarqs1.customer_api.services.exceptions.ResourceNotFoundException;
 
 @WebMvcTest(CustomerController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -53,6 +56,8 @@ public class CustomerControllerTest {
 	private CustomerResponse customer2Response;
 	private static final Long EXISTING_CUSTOMER1_ID = 1L;
 	private static final Long EXISTING_CUSTOMER2_ID = 2L;
+	private static final Long NON_EXISTING_ID = 999L;
+	private static final String INVALID_ID = "ab";
 	private static final Long NEW_CUSTOMER_ID = 3L;
 	private static final int DEFAULT_PAGE = 0;
 	private static final int DEFAULT_SIZE = 10;
@@ -80,8 +85,8 @@ public class CustomerControllerTest {
 		mockMvc.perform(get("/customers"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(2))
-		.andExpect(jsonPath("$.content[0].id").value(customer1Response.id()));
-		
+		.andExpect(jsonPath("$.content[0].id").value(customer1Response.id()))
+		.andExpect(jsonPath("$.content[1].id").value(customer2Response.id()));
 		verify(customerService).findCustomers(any(), any(), any(), any(), any(), eq(pageable));
 	}
 	
@@ -96,10 +101,12 @@ public class CustomerControllerTest {
 		mockMvc.perform(get("/customers").param("name", "Alice"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(1))
+		.andExpect(jsonPath("$.content[0].id").value(customer1Response.id()))
 		.andExpect(jsonPath("$.content[0].name").value("Alice"));
 		
 		verify(customerService).findCustomers(eq("Alice"), any(), any(), any(), any(), eq(pageable));
 	}
+	
 
 	@Test
 	@DisplayName("Should return a customer by valid id")
@@ -109,9 +116,21 @@ public class CustomerControllerTest {
 
 		mockMvc.perform(get("/customers/{id}", EXISTING_CUSTOMER1_ID))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(customer1Response.id().toString()));
+				.andExpect(jsonPath("$.id").value(customer1Response.id()))
+				.andExpect(jsonPath("$.name").value(customer1Response.name()));
 		
 		verify(customerService).findCustomerById(EXISTING_CUSTOMER1_ID);
+	}
+	
+	@Test
+	@DisplayName("Should return 400 Bad Request when ID is not a number")
+	void shouldReturnBadRequestWhenIdIsNotANumber() throws Exception {
+		
+		mockMvc.perform(get("/customers/{id}", INVALID_ID))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.error").value("Invalid argument type"))
+			.andExpect(jsonPath("$.message").value(containsString("Parameter 'id'")));
+		
 	}
 
 	@Test
@@ -128,8 +147,8 @@ public class CustomerControllerTest {
 
 		mockMvc.perform(post("/customers").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(createRequest))).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.name").value("João Silva"))
-				.andExpect(jsonPath("$.email").value("joao@example.com"));
+				.andExpect(jsonPath("$.name").value(createdResponse.name()))
+				.andExpect(jsonPath("$.email").value(createdResponse.email()));
 
 		verify(customerService).createCustomer(any(CustomerCreateRequest.class));
 
@@ -138,9 +157,20 @@ public class CustomerControllerTest {
 	@Test
 	@DisplayName("Should return 400 when creating customer with blank name")
 	void shouldReturnBadRequestWhenNameIsBlank() throws JsonProcessingException, Exception {
-	
-		mockMvc.perform(post("/customers").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+		CustomerCreateRequest createRequest = new CustomerCreateRequest(
+				"",
+				"01234567890",
+				"lucas@example.com",
+				LocalDate.of(1975, 11, 5),
+				"11983210912",
+				"H@12alksa"
+		);
+		mockMvc.perform(post("/customers")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(createRequest)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.error").value("Validation failed"))
+		    .andExpect(jsonPath("$.message").value(containsString("name: Name is required")));
 
 		verify(customerService, never()).createCustomer(any(CustomerCreateRequest.class));
 
@@ -149,12 +179,46 @@ public class CustomerControllerTest {
 	@Test
 	@DisplayName("Should return 400 when creating customer with invalid email")
 	void shouldReturnBadRequestWhenEmailIsInvalid() throws JsonProcessingException, Exception {
-		
-		mockMvc.perform(post("/customers").contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isBadRequest());
+		CustomerCreateRequest createRequest = new CustomerCreateRequest(
+				"Lucas",
+				"01234567890",
+				"lucasexample.com",
+				LocalDate.of(1975, 11, 5),
+				"11983210912",
+				"H@12alksa"
+		);
+		mockMvc.perform(post("/customers")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(createRequest)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.error").value("Validation failed"))
+		    .andExpect(jsonPath("$.message").value("email: Invalid email format"));
 
 		verify(customerService, never()).createCustomer(any(CustomerCreateRequest.class));
 	}
+	
+	@Test
+	@DisplayName("Should return 400 Bad Request when creating a customer with existing email")
+	void shouldReturnBadRequestWhenCreatingCustomerWithExistingEmail() throws JsonProcessingException, Exception {
+		CustomerCreateRequest createRequest = new CustomerCreateRequest(
+				"Lucas",
+				"01234567890",
+				"lucas@example.com",
+				LocalDate.of(1975, 11, 5),
+				"11983210912",
+				"H@12alksa"
+		);
+		
+		when(customerService.createCustomer(createRequest)).thenThrow(new BusinessException("Email already exists"));
+		
+		mockMvc.perform(post("/customers")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(createRequest)))
+		.andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.error").value("Business rule violation"))
+		.andExpect(jsonPath("$.message").value("Email already exists"));
+	}
+	
 
 	@Test
 	@DisplayName("Should update a customer when request is valid")
@@ -175,12 +239,29 @@ public class CustomerControllerTest {
 
 		mockMvc.perform(put("/customers/{id}", EXISTING_CUSTOMER1_ID).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updateRequest))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("João Silva Oliveira"))
-				.andExpect(jsonPath("$.email").value("joaool@example.com"));
+				.andExpect(jsonPath("$.name").value(updatedResponse.name()))
+				.andExpect(jsonPath("$.email").value(updatedResponse.email()));
 
 		verify(customerService).updateCustomer(eq(EXISTING_CUSTOMER1_ID), any(CustomerUpdateRequest.class));
 	}
+	
+	@Test
+	@DisplayName("Should return 404 Not Found when updating a customer with a non-existing ID")
+	void shouldReturnNotFoundWhenUpdatingCustomerWithNonExistingId() throws JsonProcessingException, Exception {
+		CustomerUpdateRequest updateRequest = new CustomerUpdateRequest("João Silva Oliveira", "joaool@example.com",
+				LocalDate.of(1990, 5, 15), "11987654321", "NewPass#123"
 
+		);
+		
+		when(customerService.updateCustomer(NON_EXISTING_ID, updateRequest))
+		.thenThrow(new ResourceNotFoundException("Customer not found with ID:" + NON_EXISTING_ID));
+		
+		mockMvc.perform(put("/customers/{id}", NON_EXISTING_ID).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(updateRequest)))
+		.andExpect(status().isNotFound())
+		.andExpect(jsonPath("$.error").value("Resource not found"))
+	    .andExpect(jsonPath("$.message").value("Customer not found with ID:" + NON_EXISTING_ID));
+	}
 	@Test
 	@DisplayName("Should delete a customer by id")
 	void shouldDeleteCustomerById() throws Exception {
@@ -191,5 +272,5 @@ public class CustomerControllerTest {
 
 		verify(customerService).deleteCustomer(EXISTING_CUSTOMER1_ID);
 	}
-
+	
 }
