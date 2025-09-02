@@ -5,12 +5,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.matheusmarqs1.customer_api.controllers.docs.AuthenticationControllerDocs;
 import com.matheusmarqs1.customer_api.security.LoginRequest;
 import com.matheusmarqs1.customer_api.services.AuthenticationService;
 
 @RestController
 @RequestMapping("/customers")
-public class AuthenticationController {
+public class AuthenticationController implements AuthenticationControllerDocs {
 	
 	private final AuthenticationService authenticationService;
 	
