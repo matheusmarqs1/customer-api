@@ -56,9 +56,9 @@ public class SecurityConfig {
 		if (key.startsWith("classpath:")) {
 			Path path = ResourceUtils.getFile(key).toPath();
 			key = Files.readString(path)
-					.replaceAll("\\s", "")
-					.replace("-----BEGINPUBLICKEY-----", "")
-					.replace("-----ENDPUBLICKEY-----", "");
+					.replaceAll("-----BEGIN PUBLIC KEY-----", "")
+					.replaceAll("-----END PUBLIC KEY-----", "")
+					.replaceAll("\\s", "");
 		}
 		byte[] keyBytes = Base64.getDecoder().decode(key);
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
@@ -72,9 +72,9 @@ public class SecurityConfig {
 		if (key.startsWith("classpath:")) {
 			Path path = ResourceUtils.getFile(key).toPath();
 			key = Files.readString(path)
-					.replaceAll("\\s", "")
-					.replace("-----BEGINPRIVATEKEY-----", "")
-					.replace("-----ENDPRIVATEKEY-----", "");
+					.replaceAll("-----BEGIN PRIVATE KEY-----", "")
+					.replaceAll("-----END PRIVATE KEY-----", "")
+					.replaceAll("\\s", "");
 		}
 		byte[] keyBytes = Base64.getDecoder().decode(key);
 		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
