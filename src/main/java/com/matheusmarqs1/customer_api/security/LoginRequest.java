@@ -1,6 +1,6 @@
 package com.matheusmarqs1.customer_api.security;
 
-public record AuthRequest(
+public record LoginRequest(
 		String email,
 		String password
 ) {

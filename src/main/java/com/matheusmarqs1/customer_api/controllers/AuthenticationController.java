@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matheusmarqs1.customer_api.security.AuthRequest;
+import com.matheusmarqs1.customer_api.security.LoginRequest;
 import com.matheusmarqs1.customer_api.services.AuthenticationService;
 
 @RestController
@@ -19,7 +19,7 @@ public class AuthenticationController {
 	}
 	
 	@PostMapping("/login")
-	public String authenticate(@RequestBody AuthRequest request) {
+	public String authenticate(@RequestBody LoginRequest request) {
 		return authenticationService.authenticate(request.email(), request.password());
 	}
 
