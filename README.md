@@ -38,7 +38,24 @@ Main endpoints:
 - `GET /customers/{id}` → Get customer by ID  
 - `PUT /customers/{id}` → Update customer  
 - `DELETE /customers/{id}` → Delete customer  
-- `POST /authenticate` → Authentication (returns JWT)  
+- `POST /customers/login` → Authentication (returns JWT)
+
+🖼️ **Project Images**  
+
+<details>
+  <summary>Swagger / API Documentation</summary>
+  <img src="images/swagger.png" alt="Swagger UI" width="600">
+</details>
+
+<details>
+  <summary>Login / JWT Request</summary>
+  <img src="images/login.png" alt="Login Request" width="600">
+</details>
+
+<details>
+  <summary>GET Request with Bearer Token</summary>
+  <img src="images/get_request.png" alt="GET Request" width="600">
+</details>
 
 ➡️ **Application Flow**  
 
@@ -68,6 +85,8 @@ mvn spring-boot:run
 
 # Stop the application
 Ctrl + C
+```
+
 🙋‍♀️ Author
 👨‍💻 Project developed by Matheus T.
 
