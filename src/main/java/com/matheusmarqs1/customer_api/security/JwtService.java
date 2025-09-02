@@ -1,6 +1,7 @@
 package com.matheusmarqs1.customer_api.security;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
@@ -10,17 +11,20 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
+import com.matheusmarqs1.customer_api.dtos.login.LoginResponse;
+
 @Service
 public class JwtService {
 	private final  JwtEncoder encoder;
+	private final Long expiry = 900L;
 	
 	public JwtService(JwtEncoder encoder) {
 		this.encoder = encoder;
 	}
 	
-	public String generateToken(Authentication authentication) {
+	public LoginResponse generateTokenAndResponse(Authentication authentication) {
 		Instant now = Instant.now();
-		Long expiry = 900L;
+		Instant expiresAt = now.plusSeconds(expiry);
 		
 		String scopes = authentication.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
@@ -29,16 +33,19 @@ public class JwtService {
 		var claims = JwtClaimsSet.builder()
 				.issuer("customer-api")
 				.issuedAt(now)
-				.expiresAt(now.plusSeconds(expiry))
+				.expiresAt(expiresAt)
 				.subject(authentication.getName())
 				.claim("scope", scopes)
 				.build();
 		
-		return encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+		String token = encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+	    
+	    List<String> roles = authentication.getAuthorities().stream()
+	        .map(GrantedAuthority::getAuthority)
+	        .collect(Collectors.toList());
+
+	    return new LoginResponse(token, roles, expiresAt);
 	}
 	
-	public Instant getExpirationTime() {
-		return Instant.now().plusSeconds(900L);
-	}
 
 }

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
 import com.matheusmarqs1.customer_api.dtos.login.LoginRequest;
+import com.matheusmarqs1.customer_api.dtos.login.LoginResponse;
 
 import jakarta.transaction.Transactional;
 
@@ -48,14 +49,17 @@ public class CustomerControllerIntegrationTest {
 		LoginRequest loginRequet = new LoginRequest("ana@example.com", "1234");
 		String loginJson = objectMapper.writeValueAsString(loginRequet);
 		
-		String tokenStr = mockMvc.perform(post("/customers/login")
+		String loginResponseJson = mockMvc.perform(post("/customers/login")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(loginJson))
 			.andReturn()
 			.getResponse()
 			.getContentAsString();
 		
-		token = "Bearer " + tokenStr;
+		 
+	    LoginResponse loginResponse = objectMapper.readValue(loginResponseJson, LoginResponse.class);
+
+	    token = "Bearer " + loginResponse.token();
 					
 	}
 	

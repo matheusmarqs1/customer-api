@@ -1,7 +1,15 @@
 package com.matheusmarqs1.customer_api.config;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +28,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.ResourceUtils;
 
 import com.matheusmarqs1.customer_api.security.CustomBearerTokenAuthenticationEntryPoint;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -31,14 +40,46 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 public class SecurityConfig {
 
 	@Value("${jwt.public.key}")
-	private RSAPublicKey publicKey;
+	private String publicKey;
 	@Value("${jwt.private.key}")
-	private RSAPrivateKey privateKey;
+	private String privateKey;
 
 	private final CustomBearerTokenAuthenticationEntryPoint customBearerTokenAuthenticationEntryPoint;
 
 	public SecurityConfig(CustomBearerTokenAuthenticationEntryPoint customBearerTokenAuthenticationEntryPoint) {
 		this.customBearerTokenAuthenticationEntryPoint = customBearerTokenAuthenticationEntryPoint;
+	}
+	
+	@Bean
+	RSAPublicKey rsaPublicKey() throws IOException, GeneralSecurityException {
+		String key = publicKey;
+		if (key.startsWith("classpath:")) {
+			Path path = ResourceUtils.getFile(key).toPath();
+			key = Files.readString(path)
+					.replaceAll("\\s", "")
+					.replace("-----BEGINPUBLICKEY-----", "")
+					.replace("-----ENDPUBLICKEY-----", "");
+		}
+		byte[] keyBytes = Base64.getDecoder().decode(key);
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		return (RSAPublicKey) kf.generatePublic(spec);
+	}
+
+	@Bean
+	RSAPrivateKey rsaPrivateKey() throws IOException, GeneralSecurityException {
+		String key = privateKey;
+		if (key.startsWith("classpath:")) {
+			Path path = ResourceUtils.getFile(key).toPath();
+			key = Files.readString(path)
+					.replaceAll("\\s", "")
+					.replace("-----BEGINPRIVATEKEY-----", "")
+					.replace("-----ENDPRIVATEKEY-----", "");
+		}
+		byte[] keyBytes = Base64.getDecoder().decode(key);
+		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		return (RSAPrivateKey) kf.generatePrivate(spec);
 	}
 
 	@Bean
@@ -62,12 +103,12 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	JwtDecoder jwtDecoder() {
+	JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
 		return NimbusJwtDecoder.withPublicKey(publicKey).build();
 	}
 
 	@Bean
-	JwtEncoder jwtEncoder() {
+	JwtEncoder jwtEncoder(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
 		var jwk = new RSAKey.Builder(publicKey).privateKey(privateKey).build();
 		var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
 		return new NimbusJwtEncoder(jwks);
