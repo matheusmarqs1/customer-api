@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,8 @@ import com.matheusmarqs1.customer_api.services.exceptions.BusinessException;
 import com.matheusmarqs1.customer_api.services.exceptions.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Unit tests for Customer API Service")
+@Tag("Unit")
 public class CustomerServiceTest {
 	
 	@Mock

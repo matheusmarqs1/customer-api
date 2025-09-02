@@ -1,9 +1,11 @@
 package com.matheusmarqs1.customer_api.controllers.docs;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.matheusmarqs1.customer_api.security.LoginRequest;
+import com.matheusmarqs1.customer_api.dtos.login.LoginRequest;
+import com.matheusmarqs1.customer_api.dtos.login.LoginResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +23,6 @@ public interface AuthenticationControllerDocs {
 			    @ApiResponse(responseCode = "401", description = "Unauthorized. Email not found or password incorrect")
 	})
 	@PostMapping("/login")
-	public String authenticate(@RequestBody LoginRequest request);
+	 public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest request);
 
 }

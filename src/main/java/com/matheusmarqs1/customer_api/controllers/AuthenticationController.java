@@ -1,12 +1,14 @@
 package com.matheusmarqs1.customer_api.controllers;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.matheusmarqs1.customer_api.controllers.docs.AuthenticationControllerDocs;
-import com.matheusmarqs1.customer_api.security.LoginRequest;
+import com.matheusmarqs1.customer_api.dtos.login.LoginRequest;
+import com.matheusmarqs1.customer_api.dtos.login.LoginResponse;
 import com.matheusmarqs1.customer_api.services.AuthenticationService;
 
 @RestController
@@ -20,8 +22,9 @@ public class AuthenticationController implements AuthenticationControllerDocs {
 	}
 	
 	@PostMapping("/login")
-	public String authenticate(@RequestBody LoginRequest request) {
-		return authenticationService.authenticate(request.email(), request.password());
+	public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest request) {
+		LoginResponse response = authenticationService.authenticate(request);
+		return ResponseEntity.ok().body(response);
 	}
 
 }

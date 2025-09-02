@@ -36,5 +36,9 @@ public class JwtService {
 		
 		return encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 	}
+	
+	public Instant getExpirationTime() {
+		return Instant.now().plusSeconds(900L);
+	}
 
 }

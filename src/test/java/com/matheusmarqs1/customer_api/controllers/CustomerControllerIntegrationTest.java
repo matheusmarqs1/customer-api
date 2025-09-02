@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
-import com.matheusmarqs1.customer_api.security.LoginRequest;
+import com.matheusmarqs1.customer_api.dtos.login.LoginRequest;
 
 import jakarta.transaction.Transactional;
 
