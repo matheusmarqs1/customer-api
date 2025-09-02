@@ -1,9 +1,11 @@
-package com.matheusmarqs1.customer_api.security;
+package com.matheusmarqs1.customer_api.services;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+
+import com.matheusmarqs1.customer_api.security.JwtService;
 
 @Service
 public class AuthenticationService {

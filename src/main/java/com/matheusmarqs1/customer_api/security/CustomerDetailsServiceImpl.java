@@ -25,7 +25,7 @@ public class CustomerDetailsServiceImpl implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		return customerRepository.findByEmail(username)
 				.map(CustomerAuthenticated::new)
-				.orElseThrow(() -> new UsernameNotFoundException("Customer not found"));
+				.orElseThrow(() -> new UsernameNotFoundException("Customer not found with the provided email"));
 	}
 
 }

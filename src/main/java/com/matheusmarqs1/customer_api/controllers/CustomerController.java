@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +23,10 @@ import com.matheusmarqs1.customer_api.dtos.customer.CustomerResponse;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
 import com.matheusmarqs1.customer_api.services.CustomerService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
@@ -36,6 +39,13 @@ public class CustomerController {
 		this.customerService = customerService;
 	}
 	
+	@Operation(summary = "Get a paginated list of customers", 
+			description = "Retrieve a list of customers filtered optionally by name, cpf, email, birthDate, or phone")
+	@SecurityRequirement(name = "Bearer Authentication")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successfully retrieved the list of customers"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized. JWT token is missing or invalid")
+	})
 	@GetMapping
 	public ResponseEntity<Page<CustomerResponse>> findCustomers(
 			@RequestParam(required = false) String name,
@@ -49,10 +59,17 @@ public class CustomerController {
 				return ResponseEntity.ok().body(customers);
 	}
 	
+	@Operation(summary = "Find customer by id", description = "Retrieve a customer by ther id")
+	@SecurityRequirement(name="Bearer Authentication")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successfully retrieved a customer"),
+			@ApiResponse(responseCode = "401", description = "Unauthorized. JWT token is missing or invalid"),
+			@ApiResponse(responseCode = "404", description = "Customer not found")
+	})
+	
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<CustomerResponse> findCustomerById(@PathVariable Long id){
 		CustomerResponse customer = customerService.findCustomerById(id);
-		System.out.println("Authentication principal: " + SecurityContextHolder.getContext().getAuthentication());
 		return ResponseEntity.ok().body(customer);
 	}
 	
