@@ -7,9 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -89,31 +87,5 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(status).body(err);
 	}
 	
-	@ExceptionHandler(InvalidBearerTokenException.class)
-	public ResponseEntity<StandardError> handleInvalidBearerException(InvalidBearerTokenException e, HttpServletRequest request){
-		String error = "Invalid Token";
-		HttpStatus status = HttpStatus.UNAUTHORIZED;
-		String message = "The access token provided is expired, revoked, malformed, or invalid";
-		StandardError err = new StandardError(Instant.now(), status.value(), error, message, request.getRequestURI());
-		return ResponseEntity.status(status).body(err);
-	}
-	
-	@ExceptionHandler(AuthorizationDeniedException.class)
-	public ResponseEntity<StandardError> handleAuthorizationDenied(AuthorizationDeniedException e, HttpServletRequest request){
-		String error = "Access Denied";
-		HttpStatus status = HttpStatus.FORBIDDEN;
-		String message = "You do not have permission to access this resource";
-		StandardError err = new StandardError(Instant.now(), status.value(), error, message, request.getRequestURI());
-		return ResponseEntity.status(status).body(err);
-	}
-	
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<StandardError> handleOtherException(Exception e, HttpServletRequest request){
-		String error = "Internal Server Error";
-		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-		String message = "A server internal error occurs";
-		StandardError err = new StandardError(Instant.now(), status.value(), error, message, request.getRequestURI());
-		return ResponseEntity.status(status).body(err);
-	}
 	
 }

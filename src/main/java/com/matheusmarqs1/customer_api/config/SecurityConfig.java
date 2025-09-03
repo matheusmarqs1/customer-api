@@ -103,8 +103,8 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/customers").hasAuthority("SCOPE_ROLE_ADMIN")
 						.anyRequest().authenticated())
 				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
-						.authenticationEntryPoint(customBearerTokenAuthenticationEntryPoint)
-						.accessDeniedHandler(customBearerTokenAccessDeniedHandler));
+						.authenticationEntryPoint(customBearerTokenAuthenticationEntryPoint))
+				.exceptionHandling(e -> e.accessDeniedHandler(customBearerTokenAccessDeniedHandler));
 
 		return http.build();
 	}

@@ -66,4 +66,10 @@ public class StandardError implements Serializable {
 	public void setPath(String path) {
 		this.path = path;
 	}
+	
+	@Override
+	public String toString() {
+	    return "StandardError [timestamp=" + timestamp + ", status=" + status + ", error=" + error + ", message=" + message
+	            + ", path=" + path + "]";
+	}
 }
