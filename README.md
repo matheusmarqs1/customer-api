@@ -5,18 +5,17 @@ REST API developed to manage individual customers. Through this API, it is possi
 
 ---
 
-⚙️ **Features**  
+## ⚙️ Features
 
-- **Customer creation:** Allows registering new customers in the system.  
-- **Customer update:** Enables updating existing customer information.  
-- **Customer deletion:** Allows removing customers from the system.  
-- **Customer retrieval:** Paginated listing of registered customers.  
-- **Attribute search:** Search customers by name, CPF, email, phone, or birth date.  
-- **Security:** Endpoints are protected with Spring Security + JWT, except the creation (POST).  
+- **Customer creation:** Allows registering new customers in the system (public).  
+- **Customer login:** Authenticate and receive JWT (public).  
+- **Customer management:** Users can update, delete, and retrieve **only their own data**.  
+- **Admin access:** Admin users can access and manage all customer data.  
+- **Security:** Endpoints are protected with **Spring Security + JWT**. Only `POST /customers` and `POST /customers/login` are public.
 
 ---
 
-🛠️ **Technologies**  
+## 🛠️ Technologies
 
 - **Language:** Java 21  
 - **Framework:** Spring Boot (Web, JPA, Security)  
@@ -28,19 +27,22 @@ REST API developed to manage individual customers. Through this API, it is possi
 
 ---
 
-📝 **Endpoints**  
+## 📝 Endpoints
 
-- Local documentation: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)  
+- **Local documentation:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
-Main endpoints:  
-- `POST /customers` → Create new customer (public)  
-- `GET /customers` → List customers (with pagination and filters)  
-- `GET /customers/{id}` → Get customer by ID  
-- `PUT /customers/{id}` → Update customer  
-- `DELETE /customers/{id}` → Delete customer  
-- `POST /customers/login` → Authentication (returns JWT)
+| Endpoint | Method | Description | Access |
+|----------|--------|-------------|--------|
+| `/customers` | POST | Register new customer | Public |
+| `/customers/login` | POST | Authenticate and return JWT | Public |
+| `/customers/{id}` | GET | Retrieve customer data | Admin or self |
+| `/customers/{id}` | PUT | Update customer data | Admin or self |
+| `/customers/{id}` | DELETE | Delete customer | Admin or self |
+| `/customers` | GET | List all customers (with pagination and filters) | Admin only |
 
-🖼️ **Project Images**  
+---
+
+## 🖼️ Project Images
 
 <details>
   <summary>Swagger / API Documentation</summary>
@@ -57,37 +59,62 @@ Main endpoints:
   <img src="images/get_request.png" alt="GET Request" width="600">
 </details>
 
-➡️ **Application Flow**  
+---
 
-1. A customer is created through the public endpoint `POST /customers`.  
-2. The customer logs in with their credentials (`POST /customers/login`) and receives a JWT.  
-3. Using the JWT, the customer can access protected endpoints: retrieve, update, or delete customer data.  
+## ➡️ Application Flow
+
+1. A customer is created via the public endpoint `POST /customers`.  
+2. The customer logs in with credentials (`POST /customers/login`) and receives a JWT.  
+3. Using the JWT, the customer can access only their own data for retrieval, update, or deletion.  
+4. Admin users can manage all customer data and access all endpoints.
 
 ---
 
-⚙️ **Setup & Run**  
+## ⚙️ Setup & Run
 
-**Prerequisites:**  
-
+**Prerequisites:**
 - Java 21  
 - Maven  
-- PostgreSQL  
+- PostgreSQL (for local development)
 
-**Setup Steps:**  
+### 🔧 Local Development Setup
 
-1. Clone the repository  
-2. Navigate to the project directory  
-3. Configure the database in `src/main/resources/application.properties` (URL, username, password)  
-
-```bash
-# Run the application
-mvn spring-boot:run
-
-# Stop the application
-Ctrl + C
+**1. Clone the repository:**
+```
+git clone https://github.com/matheusmarqs1/customer-api.git
+cd customer-api
 ```
 
-🙋‍♀️ Author
-👨‍💻 Project developed by Matheus T.
+**2. Configure PostgreSQL:**
+- Create a database named `customer_api_database`
+- Database connection settings can be found in `application-dev.properties`
+- Adjust credentials if needed (default: postgres/1234567)
+- **Important:** Change the profile in `application.properties` from `prod` to `dev`:
+  ```
+  spring.profiles.active=dev
+  ```
 
-🤝 Feel free to contribute!
+**3. Generate JWT Keys (for local development):**
+```
+# Generate private key
+openssl genrsa -out src/main/resources/app.key 2048
+
+# Generate public key
+openssl rsa -in src/main/resources/app.key -pubout -out src/main/resources/app.pub
+```
+
+**4. Run the application:**
+```
+mvn spring-boot:run
+```
+
+**5. Access the application:**
+- API: `http://localhost:8080`
+- Swagger Documentation: `http://localhost:8080/swagger-ui/index.html`
+- Use **Postman** or **Insomnia** to test the API endpoints
+
+---
+
+## 🙋 Author
+
+Project developed by [Matheus T.](https://www.linkedin.com/in/matheusmarqs/) 
