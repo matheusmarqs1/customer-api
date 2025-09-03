@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +38,7 @@ public class CustomerController implements CustomerControllerDocs {
 	}
 	
 	@GetMapping
+	@PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
 	public ResponseEntity<Page<CustomerResponse>> findCustomers(
 			@RequestParam(required = false) String name,
 			@RequestParam(required = false) String cpf,
@@ -50,6 +52,7 @@ public class CustomerController implements CustomerControllerDocs {
 	}
 	
 	@GetMapping(value = "/{id}")
+	@PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN') || #id == authentication.token.claims['customerId']")
 	public ResponseEntity<CustomerResponse> findCustomerById(@PathVariable Long id){
 		CustomerResponse customer = customerService.findCustomerById(id);
 		return ResponseEntity.ok().body(customer);
@@ -63,12 +66,14 @@ public class CustomerController implements CustomerControllerDocs {
 	}
 	
 	@PutMapping(value = "/{id}")
+	@PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN') || #id == authentication.token.claims['customerId']")
 	public ResponseEntity<CustomerResponse> updateCustomer(@PathVariable Long id, @Valid @RequestBody CustomerUpdateRequest updateRequest){
 		CustomerResponse customer = customerService.updateCustomer(id, updateRequest);
 		return ResponseEntity.ok().body(customer);
 	}
 	
 	@DeleteMapping(value = "/{id}")
+	@PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN') || #id == authentication.token.claims['customerId']")
 	public ResponseEntity<Void> deleteCustomer(@PathVariable Long id){
 		customerService.deleteCustomer(id);
 		return ResponseEntity.noContent().build();

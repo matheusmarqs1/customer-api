@@ -9,10 +9,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -20,13 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
-import com.matheusmarqs1.customer_api.dtos.login.LoginRequest;
-import com.matheusmarqs1.customer_api.dtos.login.LoginResponse;
 
 import jakarta.transaction.Transactional;
 
@@ -42,80 +39,75 @@ public class CustomerControllerIntegrationTest {
 	@Autowired
 	ObjectMapper objectMapper;
 	
-	String token;
-	
-	@BeforeEach
-	void setup() throws UnsupportedEncodingException, Exception {
-		LoginRequest loginRequet = new LoginRequest("ana@example.com", "1234");
-		String loginJson = objectMapper.writeValueAsString(loginRequet);
-		
-		String loginResponseJson = mockMvc.perform(post("/customers/login")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(loginJson))
-			.andReturn()
-			.getResponse()
-			.getContentAsString();
-		
-		 
-	    LoginResponse loginResponse = objectMapper.readValue(loginResponseJson, LoginResponse.class);
-
-	    token = "Bearer " + loginResponse.token();
-					
-	}
 	
 	@Test
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomersWhenNoFiltersAreApplied() throws Exception {
-		mockMvc.perform(get("/customers")
-				.header("Authorization", token))
+		mockMvc.perform(get("/customers"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(3));
 		
 	}
 	
 	@Test
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomersWhenNameFilterIsApplied() throws Exception {
-		mockMvc.perform(get("/customers").param("name", "teles").header("Authorization", token))
+		mockMvc.perform(get("/customers").param("name", "teles"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(2));
 	}
 	
 	@Test
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomersWhenMoreThanOneFilterAreApplied() throws Exception {
-		mockMvc.perform(get("/customers").param("name", "teles").param("email", "ana@example.com").header("Authorization", token))
+		mockMvc.perform(get("/customers").param("name", "teles").param("email", "ana@example.com"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(1))
 		.andExpect(jsonPath("$.content[0].name").value("Ana Teles"));
 	}
 	
 	@Test
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomersWithPagination() throws Exception {
-		mockMvc.perform(get("/customers").param("page", "0").param("size", "2")
-				.header("Authorization", token))
+		mockMvc.perform(get("/customers").param("page", "0").param("size", "2"))
 		.andExpect(status().isOk()).andExpect(jsonPath("$.content.length()").value(2));
 	}
 	
 	@Test
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomerByIdSuccess() throws Exception {
-		mockMvc.perform(get("/customers/{id}", 1L).header("Authorization", token))
+		mockMvc.perform(get("/customers/{id}", 2))
 		.andExpect(status().isOk())
-		.andExpect(jsonPath("$.id").value(1L))
-		.andExpect(jsonPath("$.name").value("Matheus Teles"));
+		.andExpect(jsonPath("$.id").value(2L))
+		.andExpect(jsonPath("$.name").value("Ana Teles"));
 	}
 	
 	@Test
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomerByIdNotFound() throws Exception {
-		mockMvc.perform(get("/customers/{id}", 999L).header("Authorization", token))
+		mockMvc.perform(get("/customers/{id}", 999L))
 		.andExpect(status().isNotFound())
 		.andExpect(jsonPath("$.error").value("Resource not found"))
 		.andExpect(jsonPath("$.message").value("Customer not found with ID: " + 999L));
 	}
 	
 	@Test
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomerWithInvalidIdFormat() throws Exception {
-		mockMvc.perform(get("/customers/{id}", "abc").header("Authorization", token))
+		mockMvc.perform(get("/customers/{id}", "abc"))
 		.andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.error").value("Invalid argument type"))
 		.andExpect(jsonPath("$.message").value(containsString("Parameter 'id'")));
+	}
+	
+	@Test
+	@Transactional
+	@WithMockUser(username = "customer@example.com", authorities = {"SCOPE_ROLE_CUSTOMER"})
+	void testFindCustomersForbiddenAccess() throws Exception {
+		mockMvc.perform(get("/customers"))
+		.andExpect(status().isForbidden())
+		.andExpect(jsonPath("$.error").value("Access Denied"))
+		.andExpect(jsonPath("$.message").value("You do not have permission to access this resource"));
 	}
 	
 	@Test
@@ -142,6 +134,7 @@ public class CustomerControllerIntegrationTest {
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testFindCustomersAfterCreate() throws Exception {
 		CustomerCreateRequest createRequest = new CustomerCreateRequest(
 				"João Pedro", 
@@ -161,7 +154,7 @@ public class CustomerControllerIntegrationTest {
 		.andExpect(jsonPath("$.name").value("João Pedro"))
 		.andExpect(jsonPath("$.email").value("joaopedro@example.com"));
 		
-		mockMvc.perform(get("/customers").header("Authorization", token))
+		mockMvc.perform(get("/customers"))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.content.length()").value(4));
 	}
@@ -234,10 +227,11 @@ public class CustomerControllerIntegrationTest {
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testUpdateCustomerSuccess() throws Exception {
 		CustomerUpdateRequest updateRequest = new CustomerUpdateRequest(
 				"Matheus", 
-				"matheus@example.com", 
+				"matheust@example.com", 
 				LocalDate.of(2005, 8, 28), 
 				"99999999910", 
 				"AlkMR12@");
@@ -245,29 +239,29 @@ public class CustomerControllerIntegrationTest {
 		String json = objectMapper.writeValueAsString(updateRequest);
 		mockMvc.perform(put("/customers/{id}", 1L)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(json).header("Authorization", token))
+				.content(json))
 		.andExpect(status().isOk())
 		.andExpect(jsonPath("$.id").value(1))
 		.andExpect(jsonPath("$.name").value("Matheus"))
-		.andExpect(jsonPath("$.cpf").value("999999999"))
 		.andExpect(jsonPath("$.phone").value("99999999910"));
 		
 	}
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testUpdateCustomerWithInvalidInput() throws Exception {
 		CustomerUpdateRequest updateRequest = new CustomerUpdateRequest(
-				"Matheus", 
-				"matheusexample.com", 
+				"Ana", 
+				"anaexample.com", 
 				LocalDate.of(2005, 8, 28), 
 				"99999999910", 
 				"AlkMR12@");
 		
 		String json = objectMapper.writeValueAsString(updateRequest);
-		mockMvc.perform(put("/customers/{id}", 1L)
+		mockMvc.perform(put("/customers/{id}", 2L)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(json).header("Authorization", token))
+				.content(json))
 		.andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.error").value("Validation failed"))
 		.andExpect(jsonPath("$.message").value("email: Invalid email format"));
@@ -276,18 +270,19 @@ public class CustomerControllerIntegrationTest {
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testUpdateCustomerWithMoreThanOneInvalidInput() throws Exception {
 		CustomerUpdateRequest updateRequest = new CustomerUpdateRequest(
 				" ", // Name is required
-				"matheus@example.com",
+				"ana@example.com",
 				LocalDate.of(2005, 8, 28), 
 				"999999999", // Invalid phone format
 				"AlkMR1"); // Invalid password format
 		
 		String json = objectMapper.writeValueAsString(updateRequest);
-		mockMvc.perform(put("/customers/{id}", 1L)
+		mockMvc.perform(put("/customers/{id}", 2L)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(json).header("Authorization", token))
+				.content(json))
 		.andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.error").value("Validation failed"))
 		.andExpect(jsonPath("$.message", containsString("name: Name is required")))
@@ -297,6 +292,7 @@ public class CustomerControllerIntegrationTest {
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testUpdateCustomerWithNonExistingId() throws Exception {
 		
 		CustomerUpdateRequest updateRequest = new CustomerUpdateRequest(
@@ -310,27 +306,29 @@ public class CustomerControllerIntegrationTest {
 		
 		mockMvc.perform(put("/customers/{id}", 999L)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(json).header("Authorization", token))
+				.content(json))
 		.andExpect(status().isNotFound())
 		.andExpect(jsonPath("$.error").value("Resource not found"))
 		.andExpect(jsonPath("$.message").value("Customer not found with ID: " + 999L));
+		
 	}
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testUpdateCustomerWhenEmailIsAlreadyInUseBySomeoneElse() throws Exception {
 		CustomerUpdateRequest updateRequest = new CustomerUpdateRequest(
-				"Matheus", 
-				"ana@example.com", 
-				LocalDate.of(2005, 8, 28), 
+				"Ana Teles", 
+				"matheus@example.com", 
+				LocalDate.of(1995, 3, 15), 
 				"99999999910", 
 				"AlkMR12@");
 		
 		String json = objectMapper.writeValueAsString(updateRequest);
 			
-		mockMvc.perform(put("/customers/{id}", 1L)
+		mockMvc.perform(put("/customers/{id}", 2L)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(json).header("Authorization", token))
+				.content(json))
 		.andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.error").value("Business rule violation"))
 		.andExpect(jsonPath("$.message").value("Email already exists"));
@@ -339,21 +337,24 @@ public class CustomerControllerIntegrationTest {
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testDeleteCustomerSuccess() throws Exception {
-		mockMvc.perform(delete("/customers/{id}", 1L)
-				.header("Authorization", token))
+		mockMvc.perform(delete("/customers/{id}", 1L))
 		.andExpect(status().isNoContent());
 	}
 	
 	@Test
 	@Transactional
+	@WithMockUser(username = "admin@example.com", authorities = {"SCOPE_ROLE_ADMIN"})
 	void testDeleteCustomerNotFound() throws Exception {
-		mockMvc.perform(delete("/customers/{id}", 999L)
-				.header("Authorization", token))
+		mockMvc.perform(delete("/customers/{id}", 999L))
 		.andExpect(status().isNotFound())
 		.andExpect(jsonPath("$.error").value("Resource not found"))
 		.andExpect(jsonPath("$.message").value("Customer not found with ID: " + 999L));
 	
 	}
+	
+
+	
 	
 }

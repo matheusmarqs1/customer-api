@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Objects;
 
+import com.matheusmarqs1.customer_api.entities.enums.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,11 +35,13 @@ public class Customer implements Serializable {
 	private String phone;
 	@Column(nullable=false)
 	private String password;
+	@Column(nullable = false)
+	private Integer role;
 	
 	public Customer() {
 	}
 
-	public Customer(Long id, String name, String cpf, String email, LocalDate birthDate, String phone, String password) {
+	public Customer(Long id, String name, String cpf, String email, LocalDate birthDate, String phone, String password, Role role) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -46,6 +50,7 @@ public class Customer implements Serializable {
 		this.birthDate = birthDate;
 		this.phone = phone;
 		this.password = password;
+		setRole(role);
 	}
 
 	public Long getId() {
@@ -102,6 +107,16 @@ public class Customer implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	public Role getRole() {
+		return Role.valueOf(role);
+	}
+
+	public void setRole(Role role) {
+		if(role != null) {
+			this.role = role.getCode();
+		}
 	}
 
 	public int getAge() {

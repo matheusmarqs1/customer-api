@@ -15,7 +15,8 @@ public record LoginResponse(
 		List<String> roles,
 		@Schema(description = "Token expiration time in GMT, formatted as ISO-8601 up to seconds", example = "2025-09-02T15:45:30Z")
 		@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
-		Instant expiresAt
+		Instant expiresAt,
+		Long id
 		) {
 	
 }

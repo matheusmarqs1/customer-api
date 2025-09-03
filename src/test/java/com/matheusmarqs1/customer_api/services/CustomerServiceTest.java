@@ -34,6 +34,7 @@ import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerResponse;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
 import com.matheusmarqs1.customer_api.entities.Customer;
+import com.matheusmarqs1.customer_api.entities.enums.Role;
 import com.matheusmarqs1.customer_api.repositories.CustomerRepository;
 import com.matheusmarqs1.customer_api.services.exceptions.BusinessException;
 import com.matheusmarqs1.customer_api.services.exceptions.ResourceNotFoundException;
@@ -93,7 +94,8 @@ public class CustomerServiceTest {
 				"ronaldorosa@example.com", 
 				LocalDate.of(1984, 10, 10), 
 				"11987654320", 
-				ENCODED_PASSWORD
+				ENCODED_PASSWORD,
+				Role.ROLE_CUSTOMER
 		);
 		
 		otherExistingCustomer = new Customer(
@@ -103,7 +105,8 @@ public class CustomerServiceTest {
 				"ronaldo@example.com",
 				LocalDate.of(1994, 12, 13),
 				"11987654327",
-				ENCODED_PASSWORD
+				ENCODED_PASSWORD,
+				Role.ROLE_CUSTOMER
 		);
 	}
 	
@@ -147,7 +150,6 @@ public class CustomerServiceTest {
 		assertEquals(1, response.getTotalElements());
 		assertEquals(existingCustomer.getId(), response.getContent().get(0).id());
 		assertEquals(existingCustomer.getName(), response.getContent().get(0).name());
-		assertEquals(existingCustomer.getCpf(), response.getContent().get(0).cpf());
 		
 		verify(customerRepository).findAll(any(Specification.class), eq(pageable));
 	}
@@ -182,7 +184,6 @@ public class CustomerServiceTest {
 		assertNotNull(response);
 		assertEquals(EXISTING_CUSTOMER_ID, response.id());
 	    assertEquals(existingCustomer.getName(), response.name());
-	    assertEquals(existingCustomer.getCpf(), response.cpf());
 	    assertEquals(existingCustomer.getEmail(), response.email());
 	    assertEquals(existingCustomer.getBirthDate(), response.birthDate());
 	    assertEquals(existingCustomer.getPhone(), response.phone());
@@ -225,7 +226,6 @@ public class CustomerServiceTest {
 		assertNotNull(response);
 	    assertEquals(NEW_CUSTOMER_ID, response.id());
 	    assertEquals(createRequest.name(), response.name());
-	    assertEquals(createRequest.cpf(), response.cpf());
 	    assertEquals(createRequest.email(), response.email());
 		
 	    verify(customerRepository).findByCpf(createRequest.cpf());
@@ -284,7 +284,6 @@ public class CustomerServiceTest {
 		assertNotNull(response);
 		assertEquals(EXISTING_CUSTOMER_ID, response.id());
 		assertEquals(updateRequest.name(), response.name());
-		assertEquals(existingCustomer.getCpf(), response.cpf());
 		assertEquals(updateRequest.email(), response.email());
 		assertEquals(updateRequest.birthDate(), response.birthDate());
 		assertEquals(updateRequest.phone(), response.phone());

@@ -11,8 +11,6 @@ public record CustomerResponse(
 		Long id,
 		@Schema(description = "Full name of the customer", example = "João Pedro")
 		String name, 
-		@Schema(description = "CPF of the customer", example = "12345678901")
-		String cpf,
 		@Schema(description = "Email of the customer", example = "joaopedro@example.com")
 		String email,
 		@Schema(description = "Customer's date of birth in the format yyyy-MM-dd", example = "2001-08-06")
@@ -26,7 +24,6 @@ public record CustomerResponse(
 			public static CustomerResponse fromEntity(Customer customer) {
 				return new CustomerResponse(customer.getId(), 
 						customer.getName(), 
-						customer.getCpf(), 
 						customer.getEmail(), 
 						customer.getBirthDate(), 
 						customer.getPhone(), 

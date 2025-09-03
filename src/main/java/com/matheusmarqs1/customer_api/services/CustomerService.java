@@ -12,6 +12,7 @@ import com.matheusmarqs1.customer_api.dtos.customer.CustomerCreateRequest;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerResponse;
 import com.matheusmarqs1.customer_api.dtos.customer.CustomerUpdateRequest;
 import com.matheusmarqs1.customer_api.entities.Customer;
+import com.matheusmarqs1.customer_api.entities.enums.Role;
 import com.matheusmarqs1.customer_api.repositories.CustomerRepository;
 import com.matheusmarqs1.customer_api.services.exceptions.BusinessException;
 import com.matheusmarqs1.customer_api.services.exceptions.ResourceNotFoundException;
@@ -64,7 +65,8 @@ public class CustomerService {
 				createRequest.email(),
 				createRequest.birthDate(),
 				createRequest.phone(),
-				encryptedPassword);
+				encryptedPassword,
+				Role.ROLE_CUSTOMER);
 		
 		Customer savedCustomer = customerRepository.save(customer);
 		return CustomerResponse.fromEntity(savedCustomer);

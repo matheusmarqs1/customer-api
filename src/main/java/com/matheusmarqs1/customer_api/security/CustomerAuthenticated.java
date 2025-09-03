@@ -20,7 +20,7 @@ public class CustomerAuthenticated implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+		return List.of(new SimpleGrantedAuthority(customer.getRole().name()));
 	}
 
 	@Override
@@ -51,6 +51,10 @@ public class CustomerAuthenticated implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return true;
+	}
+	
+	public Long getId() {
+		return customer.getId();
 	}
 
 }

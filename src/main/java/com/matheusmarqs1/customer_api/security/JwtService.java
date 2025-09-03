@@ -26,6 +26,8 @@ public class JwtService {
 		Instant now = Instant.now();
 		Instant expiresAt = now.plusSeconds(expiry);
 		
+		CustomerAuthenticated customerAuthenticated = (CustomerAuthenticated) authentication.getPrincipal();
+		
 		String scopes = authentication.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.joining(" "));
@@ -36,6 +38,7 @@ public class JwtService {
 				.expiresAt(expiresAt)
 				.subject(authentication.getName())
 				.claim("scope", scopes)
+				.claim("customerId", customerAuthenticated.getId())
 				.build();
 		
 		String token = encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -44,7 +47,7 @@ public class JwtService {
 	        .map(GrantedAuthority::getAuthority)
 	        .collect(Collectors.toList());
 
-	    return new LoginResponse(token, roles, expiresAt);
+	    return new LoginResponse(token, roles, expiresAt, customerAuthenticated.getId());
 	}
 	
 
