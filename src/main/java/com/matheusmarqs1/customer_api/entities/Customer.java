@@ -50,7 +50,7 @@ public class Customer implements Serializable {
 		this.birthDate = birthDate;
 		this.phone = phone;
 		this.password = password;
-		setRole(role);
+		setRole(Role.ROLE_CUSTOMER);
 	}
 
 	public Long getId() {
