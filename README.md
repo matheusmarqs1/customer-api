@@ -15,6 +15,15 @@ REST API developed to manage individual customers. Through this API, it is possi
 
 ---
 
+## Architecture & Best Practices
+
+- **Data Transfer Objects (DTO):** Isolamento da camada de persistência da camada de apresentação.
+- **Custom Exception Handling:** Respostas de erro padronizadas e tratadas globalmente (ControllerAdvice).
+- **Pagination & Sorting:** Consultas otimizadas utilizando paginação do Spring Data JPA.
+- **Automated Testing:** Cobertura de regras de negócio com JUnit 5 e Mockito.
+
+---
+
 ## 🛠️ Technologies
 
 - **Language:** Java 21  
